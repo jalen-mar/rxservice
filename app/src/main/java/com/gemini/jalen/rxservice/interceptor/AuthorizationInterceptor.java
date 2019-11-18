@@ -1,31 +1,30 @@
 package com.gemini.jalen.rxservice.interceptor;
 
 import java.io.IOException;
+import java.util.Map;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthorizationInterceptor implements Interceptor {
-    private static String token;
-    private String source;
+    private static Map<String, Object> header;
 
-    public AuthorizationInterceptor(String source) {
-        this.source = source;
+    public AuthorizationInterceptor(Map<String, Object> header) {
+        this.header = header;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         Request.Builder builder = request.newBuilder();
-        builder.addHeader("source", source);
-        if (token != null && token.length() != 0) {
-            builder.addHeader("Authorization", token);
+        for (Map.Entry<String, Object> entry : header.entrySet()) {
+            builder.addHeader(entry.getKey(), entry.getValue().toString());
         }
         return chain.proceed(builder.build());
     }
 
-    public static void setToken(String token) {
-        AuthorizationInterceptor.token = token;
+    public static void setHeader(String key, Object value) {
+        header.put(key, value);
     }
 }

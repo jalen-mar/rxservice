@@ -2,7 +2,6 @@ package com.gemini.jalen.rxservice;
 
 import android.util.Log;
 
-import com.gemini.jalen.rxservice.domain.Empty;
 import com.gemini.jalen.rxservice.domain.Result;
 import com.gemini.jalen.rxservice.domain.View;
 
@@ -42,7 +41,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         }
         observable.compose((MaybeTransformer<Result, Result>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
-                    if (result.getCode() != 0)
+                    if (result.getCode() != getCode())
                         throw new ServerException(result.getCode(), result.getMessage());
                     return result;
                 }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);
@@ -86,8 +85,12 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         Object data = result.getData();
         try {
             Method method;
-            if (data == null || data instanceof Empty) {
-                method = getClass().getMethod(result.getHandler(), String.class);
+            if (data == null || data instanceof String) {
+                try {
+                    method = getClass().getMethod(result.getHandler(), String.class);
+                } catch (Exception e) {
+                    method = getClass().getMethod("showMsg", String.class);
+                }
                 method.invoke(this, result.getMessage());
             } else {
                 method = getClass().getMethod(result.getHandler(), data.getClass());
@@ -102,5 +105,11 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         } else {
             view.loadCompleted();
         }
+    }
+
+    public void showMsg(String msg) {}
+
+    protected int getCode() {
+        return 200;
     }
 }
