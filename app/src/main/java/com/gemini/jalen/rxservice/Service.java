@@ -85,7 +85,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         Object data = result.getData();
         try {
             Method method;
-            if (data == null || data instanceof String) {
+            if (data == null || data instanceof StringBuffer) {
                 try {
                     method = getClass().getMethod(result.getHandler(), String.class);
                 } catch (Exception e) {
