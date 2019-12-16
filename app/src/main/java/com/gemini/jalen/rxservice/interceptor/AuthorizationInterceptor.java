@@ -8,7 +8,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthorizationInterceptor implements Interceptor {
-    private static Map<String, Object> header;
+    private Map<String, Object> header;
 
     public AuthorizationInterceptor(Map<String, Object> header) {
         this.header = header;
@@ -22,9 +22,5 @@ public class AuthorizationInterceptor implements Interceptor {
             builder.addHeader(entry.getKey(), entry.getValue().toString());
         }
         return chain.proceed(builder.build());
-    }
-
-    public static void setHeader(String key, Object value) {
-        header.put(key, value);
     }
 }
