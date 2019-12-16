@@ -7,6 +7,8 @@ import com.gemini.jalen.rxservice.ServerException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -47,9 +49,9 @@ class FastJsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         if (json.getString("data") == null) {
             Type[] arguments = ((ParameterizedType) type).getActualTypeArguments();
             if (List.class.isAssignableFrom((Class<?>) arguments[0])) {
-                json.put("data", "[]");
+                json.put("data", new ArrayList());
             } else {
-                json.put("data", "{}");
+                json.put("data", new HashMap());
             }
         }
         return json.toJavaObject(type);
