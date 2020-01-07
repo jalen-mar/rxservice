@@ -36,8 +36,10 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
     }
 
     protected <X> void subscribe(Maybe<Result<X>> observable) {
-        if (!view.isRefresh()) {
-            view.load();
+        if (view != null) {
+            if (!view.isRefresh()) {
+                view.load();
+            }
         }
         observable.compose((MaybeTransformer<Result, Result>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
@@ -49,10 +51,12 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
 
     @Override
     public void onComplete() {
-        if (view.isRefresh()) {
-            view.refresh(false);
-        } else {
-            view.loadCompleted();
+        if (view != null) {
+            if (view.isRefresh()) {
+                view.refresh(false);
+            } else {
+                view.loadCompleted();
+            }
         }
     }
 
@@ -63,11 +67,12 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         } catch (Exception e1) {
             Log.i("NetWork", e1.getMessage());
         }
-
-        if (view.isRefresh()) {
-            view.refresh(false);
-        } else {
-            view.loadCompleted();
+        if (view != null) {
+            if (view.isRefresh()) {
+                view.refresh(false);
+            } else {
+                view.loadCompleted();
+            }
         }
     }
 
@@ -99,11 +104,12 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        if (view.isRefresh()) {
-            view.refresh(false);
-        } else {
-            view.loadCompleted();
+        if (view != null) {
+            if (view.isRefresh()) {
+                view.refresh(false);
+            } else {
+                view.loadCompleted();
+            }
         }
     }
 

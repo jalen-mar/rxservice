@@ -12,12 +12,12 @@ import retrofit2.CallAdapter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public final class RxJavaCallAdapterFactroy extends CallAdapter.Factory {
-    public static RxJavaCallAdapterFactroy create() {
-        return new RxJavaCallAdapterFactroy();
+public final class RxJavaCallAdapterFactory extends CallAdapter.Factory {
+    public static RxJavaCallAdapterFactory create() {
+        return new RxJavaCallAdapterFactory();
     }
 
-    private RxJavaCallAdapterFactroy() {
+    private RxJavaCallAdapterFactory() {
     }
 
     @Override public CallAdapter<?, ?> get(
