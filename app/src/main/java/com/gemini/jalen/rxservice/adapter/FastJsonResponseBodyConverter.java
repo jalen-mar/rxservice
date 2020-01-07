@@ -48,11 +48,21 @@ class FastJsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         JSONObject json = JSON.parseObject(value);
         if (json.getString("data") == null) {
             Type[] arguments = ((ParameterizedType) type).getActualTypeArguments();
-            if (List.class.isAssignableFrom((Class<?>) arguments[0])) {
-                json.put("data", new ArrayList());
+            if (arguments[0] instanceof  ParameterizedType) {
+                ParameterizedType argument = ((ParameterizedType) arguments[0]);
+                if (List.class.isAssignableFrom((Class<?>) argument.getRawType())) {
+                    json.put("data", new ArrayList());
+                } else {
+                    json.put("data", new HashMap());
+                }
             } else {
-                json.put("data", new HashMap());
+                if (List.class.isAssignableFrom((Class<?>) arguments[0])) {
+                    json.put("data", new ArrayList());
+                } else {
+                    json.put("data", new HashMap());
+                }
             }
+
         }
         return json.toJavaObject(type);
     }
