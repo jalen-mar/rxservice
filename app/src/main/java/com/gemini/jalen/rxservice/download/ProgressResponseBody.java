@@ -17,10 +17,13 @@ public class ProgressResponseBody  extends ResponseBody {
     private final ProgressListener progressListener;
     private BufferedSource bufferedSource;
     private Handler handler;
-    ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener, Handler handler) {
+    private long fileSize;
+
+    ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener, Handler handler, long fileSize) {
         this.responseBody = responseBody;
         this.progressListener = progressListener;
         this.handler = handler;
+        this.fileSize = fileSize;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class ProgressResponseBody  extends ResponseBody {
 
     @Override
     public long contentLength() {
-        return responseBody.contentLength();
+        return fileSize == 0 ? responseBody.contentLength() : fileSize;
     }
 
     @Override

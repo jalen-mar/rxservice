@@ -23,9 +23,11 @@ public class Downloader implements Interceptor {
     private OkHttpClient client;
     private File targetFile;
     private Handler handler;
+    private long fileSize;
 
-    public Downloader(ProgressListener listener) {
+    public Downloader(ProgressListener listener, long fileSize) {
         this.listener = listener;
+        this.fileSize = fileSize;
         this.handler = new Handler(Looper.getMainLooper());
         this.client = new OkHttpClient.Builder().addNetworkInterceptor(this).build();
     }
@@ -90,7 +92,7 @@ public class Downloader implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Response originalResponse = chain.proceed(chain.request());
         return originalResponse.newBuilder()
-                .body(new ProgressResponseBody(originalResponse.body(), listener, handler))
+                .body(new ProgressResponseBody(originalResponse.body(), listener, handler, fileSize))
                 .build();
     }
 }
