@@ -43,7 +43,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         }
         observable.compose((MaybeTransformer<Result, Result>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
-                    if (result.getCode() != getCode())
+                    if (isSuccess(result))
                         throw new ServerException(result.getCode(), result.getMessage());
                     return result;
                 }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);
@@ -116,6 +116,15 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
     public void showMsg(String msg) {}
 
     protected int getCode() {
-        return 200;
+        return -1;
+    }
+
+    protected boolean isSuccess(Result result) {
+        int code = getCode();
+        if (code == -1) {
+            return !result.isSuccess();
+        } else {
+            return code != getCode();
+        }
     }
 }

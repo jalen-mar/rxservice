@@ -3,6 +3,7 @@ package com.gemini.jalen.rxservice.domain;
 public class Result<T> implements Packet<T> {
     private T data;
     private int code;
+    private boolean success;
     private String message;
     private String handler;
 
@@ -20,6 +21,14 @@ public class Result<T> implements Packet<T> {
 
     public void setCode(int code) {
         this.code = code;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public String getMessage() {
