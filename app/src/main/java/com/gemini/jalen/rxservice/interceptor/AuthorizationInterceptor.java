@@ -8,17 +8,18 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class AuthorizationInterceptor implements Interceptor {
-    private Map<String, Object> header;
+    private AuthorizationInfoProvider provider;
 
-    public AuthorizationInterceptor(Map<String, Object> header) {
-        this.header = header;
+    public AuthorizationInterceptor(AuthorizationInfoProvider provider) {
+        this.provider = provider;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         Request.Builder builder = request.newBuilder();
-        for (Map.Entry<String, Object> entry : header.entrySet()) {
+        Map<String, Object> headers = provider.getHeaders();
+        for (Map.Entry<String, Object> entry : headers.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue().toString());
         }
         return chain.proceed(builder.build());
