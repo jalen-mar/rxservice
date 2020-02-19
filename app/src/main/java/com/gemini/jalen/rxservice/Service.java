@@ -36,44 +36,35 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
     }
 
     protected <X> void subscribe(Maybe<Result<X>> observable) {
-        if (view != null) {
-            if (!view.isRefresh()) {
-                view.load();
-            }
-        }
+        loading();
         observable.compose((MaybeTransformer<Result, Result>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
-                    if (isSuccess(result))
-                        throw new ServerException(result.getCode(), result.getMessage());
+                    if (isSuccess(result)) {
+                        Method method;
+                        try {
+                            method = getClass().getMethod(result.getHandler() + "OnError", Result.class);
+                            method.invoke(this, result);
+                        } catch (Exception e) {
+                            throw new ServerException(result.getCode(), result.getMessage());
+                        }
+                    }
                     return result;
                 }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);
     }
 
     @Override
     public void onComplete() {
-        if (view != null) {
-            if (view.isRefresh()) {
-                view.refresh(false);
-            } else {
-                view.loadCompleted();
-            }
-        }
+        loadCompleted();
     }
 
     @Override
-    public void onError(Throwable e) {
+    public void onError(Throwable t) {
         try {
-            RxJavaPlugins.getErrorHandler().accept(e);
-        } catch (Exception e1) {
-            Log.i("NetWork", e1.getMessage());
+            RxJavaPlugins.getErrorHandler().accept(t);
+        } catch (Exception e) {
+            Log.i("message-http", e.getMessage());
         }
-        if (view != null) {
-            if (view.isRefresh()) {
-                view.refresh(false);
-            } else {
-                view.loadCompleted();
-            }
-        }
+        loadCompleted();
     }
 
     @Override
@@ -104,13 +95,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (view != null) {
-            if (view.isRefresh()) {
-                view.refresh(false);
-            } else {
-                view.loadCompleted();
-            }
-        }
+        loadCompleted();
     }
 
     public void showMsg(String msg) {}
@@ -125,6 +110,24 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
             return !result.isSuccess();
         } else {
             return code != getCode();
+        }
+    }
+
+    private void loadCompleted() {
+        if (view != null) {
+            if (view.isRefresh()) {
+                view.refresh(false);
+            } else {
+                view.loadCompleted();
+            }
+        }
+    }
+
+    private void loading() {
+        if (view != null) {
+            if (!view.isRefresh()) {
+                view.load();
+            }
         }
     }
 }
