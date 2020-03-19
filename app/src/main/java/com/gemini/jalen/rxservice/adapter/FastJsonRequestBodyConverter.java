@@ -14,7 +14,6 @@ import retrofit2.Converter;
 public final class FastJsonRequestBodyConverter<T> implements Converter<T, RequestBody> {
     public static final MediaType TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
     public static final MediaType TYPE_TEXT = MediaType.parse("text/plain; charset=utf-8");
-    public static final MediaType TYPE_PARAMS = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8");
 
     public static FastJsonRequestBodyConverter create() {
         return new FastJsonRequestBodyConverter();

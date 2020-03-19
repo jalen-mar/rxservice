@@ -6,5 +6,5 @@ import io.reactivex.annotations.NonNull;
 
 public interface AuthorizationInfoProvider {
     @NonNull
-    Map<String, Object> getHeaders();
+    Map<String, Object> getAuthorizationInfo();
 }

@@ -8,6 +8,8 @@ import com.gemini.jalen.rxservice.domain.View;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import io.reactivex.Maybe;
 import io.reactivex.MaybeObserver;
@@ -89,13 +91,28 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
                 }
                 method.invoke(this, result.getMessage());
             } else {
-                method = getClass().getMethod(result.getHandler(), data.getClass());
+                Class cls = getDataClass(data);
+                method = getClass().getMethod(result.getHandler(), cls);
                 method.invoke(this, data);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         loadCompleted();
+    }
+
+    private Class getDataClass(Object data) {
+        Class cls;
+        if (data instanceof List) {
+            cls = List.class;
+        } else if (data instanceof Map) {
+            cls = Map.class;
+        } else if (data instanceof Set) {
+            cls = Set.class;
+        } else {
+            cls = data.getClass();
+        }
+        return cls;
     }
 
     public void showMsg(String msg) {}
@@ -124,10 +141,8 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
     }
 
     private void loading() {
-        if (view != null) {
-            if (!view.isRefresh()) {
-                view.load();
-            }
+        if (view != null && !view.isRefresh()) {
+            view.load();
         }
     }
 }

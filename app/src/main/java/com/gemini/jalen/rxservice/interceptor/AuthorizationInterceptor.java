@@ -18,7 +18,7 @@ public class AuthorizationInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         Request.Builder builder = request.newBuilder();
-        Map<String, Object> headers = provider.getHeaders();
+        Map<String, Object> headers = provider.getAuthorizationInfo();
         for (Map.Entry<String, Object> entry : headers.entrySet()) {
             builder.addHeader(entry.getKey(), entry.getValue().toString());
         }
