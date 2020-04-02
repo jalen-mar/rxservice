@@ -46,6 +46,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
                         try {
                             method = getClass().getMethod(result.getHandler() + "OnError", Result.class);
                             method.invoke(this, result);
+                            throw new IllegalStateException();
                         } catch (Exception e) {
                             throw new ServerException(result.getCode(), result.getMessage());
                         }
