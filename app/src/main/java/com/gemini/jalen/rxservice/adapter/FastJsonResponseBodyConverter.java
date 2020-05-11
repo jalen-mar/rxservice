@@ -46,7 +46,9 @@ class FastJsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
     //以防脑残的后台接口数据
     private <T> T parseObject(String value, Type type) {
         JSONObject json = JSON.parseObject(value);
-        if (json.getString("data") == null) {
+        String targetData = json.getString("data");
+        if (targetData == null || targetData.trim().length() == 0) {
+            json.remove("data");
             Type[] arguments = ((ParameterizedType) type).getActualTypeArguments();
             if (arguments[0] instanceof ParameterizedType) {
                 ParameterizedType argument = ((ParameterizedType) arguments[0]);
