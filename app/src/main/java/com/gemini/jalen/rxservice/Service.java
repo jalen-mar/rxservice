@@ -2,7 +2,7 @@ package com.gemini.jalen.rxservice;
 
 import android.util.Log;
 
-import com.gemini.jalen.rxservice.domain.Result;
+import com.gemini.jalen.rxservice.domain.Packet;
 import com.gemini.jalen.rxservice.domain.View;
 
 import java.lang.reflect.Method;
@@ -16,10 +16,11 @@ import io.reactivex.MaybeObserver;
 import io.reactivex.MaybeTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.Schedulers;
 
-public abstract class Service<T extends View> implements MaybeObserver<Result> {
+public abstract class Service<T extends View> implements MaybeObserver<Packet> {
     protected T view;
     private List<Disposable> list = new ArrayList<>();
 
@@ -37,14 +38,22 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         this.view = null;
     }
 
-    protected <X> void subscribe(Maybe<Result<X>> observable) {
-        loading();
-        observable.compose((MaybeTransformer<Result, Result>) upstream ->
+    protected <X extends Packet, Y extends Maybe<X>> void subscribe(Y observable) {
+        subscribe(observable, false);
+    }
+
+    protected <X extends Packet, Y extends Maybe<X>> void subscribe(Y observable, boolean isSilent) {
+        Maybe.just(new MaybeWrapper(observable, isSilent, view)).flatMap((Function<MaybeWrapper, Y>) wrapper -> {
+            if (!wrapper.isSilent && wrapper.view != null && !wrapper.view.isRefreshing()) {
+                view.load();
+            }
+            return (Y) wrapper.observable;
+        }).compose((MaybeTransformer<Packet, Packet>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
                     if (isSuccess(result)) {
                         Method method;
                         try {
-                            method = getClass().getMethod(result.getHandler() + "OnError", Result.class);
+                            method = getClass().getMethod(result.getHandler() + "OnError", result.getClass());
                             method.invoke(this, result);
                             throw new IllegalStateException();
                         } catch (Exception e) {
@@ -52,7 +61,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
                         }
                     }
                     return result;
-                }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);
+                }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);;
     }
 
     @Override
@@ -80,7 +89,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
     }
 
     @Override
-    public void onSuccess(Result result) {
+    public void onSuccess(Packet result) {
         Object data = result.getData();
         try {
             Method method;
@@ -122,7 +131,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
         return -1;
     }
 
-    protected boolean isSuccess(Result result) {
+    protected boolean isSuccess(Packet result) {
         int code = getCode();
         if (code == -1) {
             return !result.isSuccess();
@@ -133,17 +142,23 @@ public abstract class Service<T extends View> implements MaybeObserver<Result> {
 
     private void loadCompleted() {
         if (view != null) {
-            if (view.isRefresh()) {
+            if (view.isRefreshing()) {
                 view.refresh(false);
             } else {
                 view.loadCompleted();
             }
         }
     }
+}
 
-    private void loading() {
-        if (view != null && !view.isRefresh()) {
-            view.load();
-        }
+class MaybeWrapper {
+    Maybe observable;
+    boolean isSilent;
+    View view;
+
+    MaybeWrapper(Maybe observable, boolean isSilent, View view) {
+        this.observable = observable;
+        this.isSilent = isSilent;
+        this.view = view;
     }
 }

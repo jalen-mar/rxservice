@@ -2,7 +2,7 @@ package com.gemini.jalen.rxservice.adapter;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.gemini.jalen.rxservice.domain.ParamsBean;
+import com.gemini.jalen.rxservice.domain.JsonBean;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public final class FastJsonRequestBodyConverter<T> implements Converter<T, Reque
             body = RequestBody.create(TYPE_TEXT, value.toString());
         } else {
             JSONObject json = (JSONObject) JSON.toJSON(value);
-            if (value instanceof ParamsBean) {
+            if (value instanceof JsonBean) {
                 body = RequestBody.create(TYPE_JSON, json.toJSONString());
             } else {
                 FormBody.Builder builder = new FormBody.Builder();

@@ -5,7 +5,7 @@ public interface View {
 
     void loadCompleted();
 
-    boolean isRefresh();
+    boolean isRefreshing();
 
     void refresh(boolean refresh);
 }

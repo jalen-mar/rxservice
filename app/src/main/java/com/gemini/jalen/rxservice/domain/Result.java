@@ -6,6 +6,7 @@ public class Result<T> implements Packet<T> {
     private boolean success;
     private String message;
     private String handler;
+    private Object historicData;
 
     public T getData() {
         return data;
@@ -49,5 +50,13 @@ public class Result<T> implements Packet<T> {
     @Override
     public void setHandler(String handler) {
         this.handler = handler;
+    }
+
+    public <X> X getHistoricData() {
+        return null;
+    }
+
+    public void setHistoricData(Object historicData) {
+        this.historicData = historicData;
     }
 }

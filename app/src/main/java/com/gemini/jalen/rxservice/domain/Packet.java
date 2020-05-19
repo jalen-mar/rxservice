@@ -5,5 +5,6 @@ public interface Packet<T> {
     String getMessage();
     T getData();
     String getHandler();
+    boolean isSuccess();
     void setHandler(String handler);
 }
