@@ -43,12 +43,10 @@ public abstract class Service<T extends View> implements MaybeObserver<Packet> {
     }
 
     protected <X extends Packet, Y extends Maybe<X>> void subscribe(Y observable, boolean isSilent) {
-        Maybe.just(new MaybeWrapper(observable, isSilent, view)).flatMap((Function<MaybeWrapper, Y>) wrapper -> {
-            if (!wrapper.isSilent && wrapper.view != null && !wrapper.view.isRefreshing()) {
-                view.load();
-            }
-            return (Y) wrapper.observable;
-        }).compose((MaybeTransformer<Packet, Packet>) upstream ->
+        if (!isSilent && view != null && !view.isRefreshing()) {
+            view.load();
+        }
+        observable.compose((MaybeTransformer<Packet, Packet>) upstream ->
                 upstream.subscribeOn(Schedulers.io()).map(result -> {
                     if (isSuccess(result)) {
                         Method method;
@@ -61,7 +59,7 @@ public abstract class Service<T extends View> implements MaybeObserver<Packet> {
                         }
                     }
                     return result;
-                }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);;
+                }).observeOn(AndroidSchedulers.mainThread())).subscribe(this);
     }
 
     @Override
