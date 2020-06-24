@@ -1,0 +1,23 @@
+apply plugin: "maven"
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories {
+        mavenDeployer {
+            repository(url: "${nexusUrl}/repository/maven-snapshots/") {
+                authentication(userName: "${nexusUsername}", password: "${nexusPassword}")
+            }
+            pom.project {
+                version '0.0.2-SNAPSHOT'
+                artifactId 'aries-android-rxservice'
+                groupId 'com.sunvua.aries'
+                packaging 'aar'
+            }
+        }
+    }
+}

@@ -26,10 +26,14 @@ public class Downloader implements Interceptor {
     private long fileSize;
 
     public Downloader(ProgressListener listener, long fileSize) {
+        this(listener, fileSize, new OkHttpClient.Builder().build());
+    }
+
+    public Downloader(ProgressListener listener, long fileSize, OkHttpClient client) {
         this.listener = listener;
         this.fileSize = fileSize;
         this.handler = new Handler(Looper.getMainLooper());
-        this.client = new OkHttpClient.Builder().addNetworkInterceptor(this).build();
+        this.client = client.newBuilder().addNetworkInterceptor(this).build();
     }
 
     public void setUrl(String url) {

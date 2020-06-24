@@ -148,15 +148,3 @@ public abstract class Service<T extends View> implements MaybeObserver<Packet> {
         }
     }
 }
-
-class MaybeWrapper {
-    Maybe observable;
-    boolean isSilent;
-    View view;
-
-    MaybeWrapper(Maybe observable, boolean isSilent, View view) {
-        this.observable = observable;
-        this.isSilent = isSilent;
-        this.view = view;
-    }
-}

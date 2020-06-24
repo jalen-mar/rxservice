@@ -51,7 +51,11 @@ public class ProgressResponseBody  extends ResponseBody {
             @Override
             public long read(Buffer sink, long byteCount) throws IOException {
                 long size = super.read(sink, byteCount);
-                handler.post(() -> progressListener.update(currentSize += size != -1 ? size : 0, contentLength(), size == -1));
+                if (size == -1) {
+                    handler.postDelayed(() -> progressListener.update(currentSize += size != -1 ? size : 0, contentLength(), true), 250);
+                } else {
+                    handler.post(() -> progressListener.update(currentSize += size != -1 ? size : 0, contentLength(), false));
+                }
                 return size;
             }
         };
